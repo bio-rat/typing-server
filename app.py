@@ -20,11 +20,14 @@ def create():
   db.session.add(score)
   db.session.commit()
 
+  # find the current excerpt
+  excerpt = Excerpt.query.filter_by(id=x['excerpt_id']).first()
+
   # count total score
-  total_scores = Score.query.filter_by(excerpt_id=x['excerpt_id']).count()
+  total_scores = excerpt.scores.count()
 
   # find all the score of excerpts_id
-  scores = Score.query.with_entities(Score.wpm).filter_by(excerpt_id=x['excerpt_id']).order_by(Score.wpm.desc()).all()
+  scores = excerpt.scores.order_by(Score.wpm.desc()).all()
   
   # make wpm list
   ranking_list = []
@@ -49,11 +52,11 @@ def random_excerpt():
     excerpt = Excerpt.query.order_by(db.func.random()).first()
 
     # total scores
-    scores_count = Score.query.filter_by(excerpt_id=excerpt.id).count()
+    scores_count = excerpt.scores.count()
 
     # all the scores
-    scores = Score.query.filter_by(excerpt_id=excerpt.id).order_by(Score.wpm.desc()).all()
-    
+    scores = excerpt.scores.order_by(Score.wpm.desc()).all()
+
     # only 3 top scores
     top_scores = []
 
@@ -72,7 +75,7 @@ def random_excerpt():
           'scores_count': scores_count
         }
       }
-    })
+    }), 200
 
                 
 class Score(db.Model):
